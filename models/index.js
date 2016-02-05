@@ -8,7 +8,7 @@ var fs        = require("fs");
 var path      = require("path");
 var Sequelize = require("sequelize");
 var env       = process.env.NODE_ENV || "development";
-var config    = require(path.join(__dirname, '..', 'config', 'config.js'))[env];
+var config    = require(path.join(__dirname, '..', 'config', 'db.js'))[env];
 var sequelize = new Sequelize(config.database, config.username, config.password, config);
 var db        = {};
 
@@ -27,6 +27,8 @@ Object.keys(db).forEach(function(modelName) {
     db[modelName].associate(db);
   }
 });
+
+sequelize.sync();
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

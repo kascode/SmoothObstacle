@@ -4,7 +4,7 @@
 
 "use strict";
 
-module.exports = function (sequielize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   return sequelize.define("Obstacle", {
     lat: DataTypes.FLOAT,
     lng: DataTypes.FLOAT,

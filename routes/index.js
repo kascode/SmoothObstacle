@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var formidable = require('formidable');
 var fs = require('fs-extra');
+var models = require('../models');
 
 /* GET home page. */
 router.post('/', function(req, res, next) {
@@ -11,38 +12,86 @@ router.post('/', function(req, res, next) {
 router.post('/obstacle', function(req, res) {
 
   var form = new formidable.IncomingForm();
+  var lat, lng;
   form.uploadDir = 'public/images/obstacles/tmp';
 
   form.parse(req, function(err, fields, files) {
-    console.log("Fields:", fields);
-    console.log("Files:", files);
+    //console.log("Fields:", fields);
+    //console.log("Files:", files);
+
+    lat = parseFloat(fields.obstacleLat);
+    lng = parseFloat(fields.obstacleLng);
+
+    console.log("err", err);
 
     if (!err) {
-      form.on('end', function () {
-        console.log("Upload finished.");
 
-        var tempPath = this.openedFiles[0].path;
-        var fileName = this.openedFiles[0].name;
-        var newPath = 'public/images/';
+    }
+  });
 
-        fs.copy(tempPath, newPath + fileName, function (err) {
-          if (err) {
-            res.send(JSON.stringify({
-              status: 'ERROR',
-              text: 'File write error'
-            }));
-          } else {
-            res.send(JSON.stringify({
-              status: 'OK',
-              text: 'File uploaded'
-            }));
-          }
-          fs.remove(tempPath);
-        });
+  form.on('end', function () {
+    console.log("Upload finished.", this.openedFiles[0].name);
+
+    if (this.openedFiles[0].size) {
+      var tempPath = this.openedFiles[0].path;
+      var splitName = this.openedFiles[0].name.split('.');
+      var fileName = randomString(10) + '.' + splitName[splitName.length-1];
+      var newPath = 'public/images/';
+
+      fs.copy(tempPath, newPath + fileName, function (err) {
+        if (err) {
+          res.send(JSON.stringify({
+            status: 'ERROR',
+            text: 'File write error'
+          }));
+        } else {
+          models.Obstacle.create({
+              lat: lat,
+              lng: lng,
+              img: newPath + fileName
+            })
+            .then(function (obs) {
+              fs.remove(tempPath);
+              console.log(obs.get({
+                plain: true
+              }));
+            })
+            .then(function () {
+              res.send(JSON.stringify({
+                status: 'OK',
+                text: 'File uploaded. Obstacle saved'
+              }));
+            });
+        }
       });
+    } else {
+      models.Obstacle.create({
+          lat: lat,
+          lng: lng
+        })
+        .then(function (obs) {
+          console.log(obs.get({
+            plain: true
+          }));
+        })
+        .then(function () {
+          res.send(JSON.stringify({
+            status: 'OK',
+            text: 'Obstacle saved'
+          }))
+        });
     }
   });
 });
+
+var randomString = function(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for(var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
 
 
 router.get('/admin', function (req, res) {
