@@ -84,6 +84,21 @@ router.post('/obstacle', function(req, res) {
   });
 });
 
+router.get('/obstacle', function (req, res) {
+
+  models.Obstacle.findAll()
+    .then(function (obstacles) {
+      var obstacleArray = [];
+
+      for (var i = 0; i < obstacles.length; i++) {
+        var obstacle = obstacles[i];
+        obstacleArray.push(obstacle.get({plain:true}));
+      }
+
+      res.send(obstacleArray);
+    });
+});
+
 var randomString = function(length) {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
