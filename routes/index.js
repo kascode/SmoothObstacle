@@ -9,7 +9,7 @@ router.post('/', function(req, res, next) {
   console.log(req.body);
 });
 
-router.post('/obstacle', function(req, res) {
+router.post('/obstacle/add', function(req, res) {
 
   var form = new formidable.IncomingForm();
   var lat, lng;
