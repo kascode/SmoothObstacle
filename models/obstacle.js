@@ -8,6 +8,8 @@ module.exports = function (sequelize, DataTypes) {
   return sequelize.define("Obstacle", {
     lat: DataTypes.FLOAT,
     lng: DataTypes.FLOAT,
-    img: DataTypes.STRING
+    img: DataTypes.STRING,
+    width: DataTypes.INTEGER,
+    height: DataTypes.INTEGER
   });
 };

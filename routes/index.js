@@ -3,6 +3,7 @@ var router = express.Router();
 var formidable = require('formidable');
 var fs = require('fs-extra');
 var models = require('../models');
+var sizeOf = require('image-size');
 
 /* GET home page. */
 router.post('/', function(req, res, next) {
@@ -37,6 +38,7 @@ router.post('/obstacle/add', function(req, res) {
       var splitName = this.openedFiles[0].name.split('.');
       var fileName = randomString(10) + '.' + splitName[splitName.length-1];
       var newPath = 'public/images/';
+      var dimensions = sizeOf(tempPath);
 
       fs.copy(tempPath, newPath + fileName, function (err) {
         if (err) {
@@ -48,7 +50,9 @@ router.post('/obstacle/add', function(req, res) {
           models.Obstacle.create({
               lat: lat,
               lng: lng,
-              img: newPath + fileName
+              img: fileName,
+              width: dimensions.width,
+              height: dimensions.height
             })
             .then(function (obs) {
               fs.remove(tempPath);
